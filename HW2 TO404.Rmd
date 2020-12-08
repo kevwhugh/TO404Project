@@ -17,11 +17,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 To begin, I needed to load in the set. I combined all of the data into one csv using the command prompt to avoid a long compile time in RStudio. I also needed to load in the packages, tidyverse and lubridate, that I would need to use to manipulate the data and perform descriptive statistics in my analysis. From here, I took a random sample of the data and and assigned it to a dataframe "test" in order for me to observe and clean it. 
 
-```{r}
-#Load in dataset
-setwd("C:/Users/OWNERS-PC/Downloads/HW2 TO404 CSV")
-big <- read.csv(file = "combined-citi-data.csv")
-```
 
 ```{r}
 #Load packages
@@ -30,13 +25,13 @@ library(lubridate)
 ```
 
 ```{r}
-test <- sample_frac(big, .05)
+test <- read.csv(file = "sample.csv")
 ```
 
 ##Cleaning 
 Upon realizing that the data consisted of only factor type variables, I needed to reassign ones I wished to use to their respective types so I could formulate summary stats and make true observations. 
 ```{r}
-clean <- test %>% mutate(birth.year = as.numeric(as.character(birth.year)), tripduration = as.numeric(as.character(tripduration)), starttime = as_datetime(as.character(starttime)), stoptime = as_datetime(as.character(stoptime)), start.station.latitude = as.numeric(as.character(start.station.latitude)), start.station.longitude = as.numeric(as.character(start.station.longitude)), end.station.latitude = as.numeric(as.character(end.station.latitude)), end.station.longitude= as.numeric(as.character(end.station.longitude)), month = month(starttime, label = TRUE), day = wday(starttime, label = TRUE), start.station.name = as.character(start.station.name), end.station.name = as.character(end.station.name)  )
+clean <- test %>% mutate(birth.year = as.numeric(as.character(birth.year)), tripduration = as.numeric(as.character(tripduration)), starttime = as_datetime(as.character(starttime)), stoptime = as_datetime(as.character(stoptime)), start.station.latitude = as.numeric(as.character(start.station.latitude)), start.station.longitude = as.numeric(as.character(start.station.longitude)), end.station.latitude = as.numeric(as.character(end.station.latitude)), end.station.longitude= as.numeric(as.character(end.station.longitude)), month = month(starttime, label = TRUE), day = wday(starttime, label = TRUE), start.station.name = as.character(start.station.name), end.station.name = as.character(end.station.name)  ) %>% filter(usertype != "usertype")
 head(clean)
 
 ```
@@ -45,7 +40,7 @@ head(clean)
 Below, I computed basic summary stats of variables I believed were important for understanding the riders and stations for citiBike. I started by seeing how many users of each type there were, how many users were of which gender, average ages of bikers, hot spot stations, and how long people typically rode. We can see that most bikers in 2019 were subsribers to the program, and that men rode more than women, and the average age of the subscribers was lower than that of customers. We see that while there are some hot spot stations, many of the stations get good use, however there are some which are only used a handful of times throughout the year. Finally, you can see that the set is slightly skewed to the right becuase the mean is higher than the median; some riders may take long trips as exercise and these are more of an anomoly. The plots I created demonstrate the distribution of customers.
 
 Numbers
-```{r}
+```{r, cache = TRUE}
 clean %>% group_by(usertype) %>% summarize(n=n())
 clean %>% group_by(gender) %>% summarize(n = n()) 
 clean %>% group_by(usertype) %>% summarize(age = median(2019-birth.year))
@@ -54,7 +49,7 @@ clean %>% group_by(end.station.name) %>% summarize(n = n()) %>% arrange(desc(n))
 clean %>% summarize(mean = mean(tripduration/60), med = median(tripduration/60))
 ```
 
-```{r}
+```{r, cache = TRUE}
 clean %>% ggplot(aes(usertype, fill = gender)) + geom_bar()
 clean %>% group_by(usertype) %>% mutate(age = 2019-birth.year) %>% ggplot(aes(usertype,age)) + geom_boxplot()
 ```
@@ -64,7 +59,7 @@ clean %>% group_by(usertype) %>% mutate(age = 2019-birth.year) %>% ggplot(aes(us
 
 In this section, I dive deeper into the data to understand some of the trends lying within. To start, I wanted to analyze if days of the week or months have an impact on riders and their trips. As shown in the pie chart, the days of the week do not fully impact the amount of riders, however sunday has a much smaller number of riders than the other 6. Months, however, seem to affect the amount of usage, most likely due to weather. The winter months see a large decrease in usage compared to summer/warm months, September seeing the most. I attribute this to the weather being nicer and students going back to school. Furthermore, the duration of rides in a month is distributed like the amount of rides per month. People likely keep their trips shorter, ride faster, or choose to travel via motor vehicle. 
 From here, I wanted to see if age affects the trip durations; you can see that the younger riders typically ride longer trips with 1969, 1937, and 1939 also high up there. It seems that some riders are likely lying about their age and skewing the data slightly. Finally, I checked the average times that riders typically start and stop, and it would seem like most rides occur in the afternoon, specifically in the 3:00PM range. 
-```{r}
+```{r, cache = TRUE}
 clean %>% group_by(month) %>% summarize(n = n()) %>% arrange(desc(n))
 clean %>% group_by(day) %>% summarize(n=n()) %>% arrange(desc(n)) 
 clean %>% group_by(birth.year) %>% summarize(avgtripdur = median(tripduration), n=n()) %>% arrange(-avgtripdur) %>% filter(n > 100)
@@ -72,7 +67,7 @@ mean.POSIXct(clean$starttime)
 mean.POSIXct(clean$stoptime)
 ```
 
-```{r}
+```{r, cache = TRUE}
 clean %>% group_by(day) %>% summarize(n=n()) %>% ggplot(aes("", n, fill = day)) + geom_bar(stat = 'identity', width = 1, color = "white") + coord_polar("y", start=0) + theme_void() + labs(title = "Distibution of Riders On Days")
 clean %>% group_by(month) %>% summarize(n = n()) %>% ggplot(aes(month, n, fill = month)) + geom_col()
 clean %>% group_by(gender) %>% summarize(meantripdur = median(tripduration/60))%>%  ggplot(aes(gender,meantripdur, fill = gender)) + geom_col()
@@ -83,10 +78,10 @@ library(gganimate)
 ```
 
 ```{r}
-stationdf <- clean %>% select(start.station.name, start.station.latitude, start.station.longitude, end.station.name ,end.station.latitude, end.station.longitude)
+stationdf <- clean %>% select(starttime, start.station.name, start.station.latitude, start.station.longitude, stoptime ,end.station.name ,end.station.latitude, end.station.longitude) %>% mutate(starttime = round_date(starttime, unit = "hour"), stoptime = round_date(stoptime, unit = "hour"), hourStart = hour(starttime), hourStop = hour(stoptime))
 ```
 
-```{r}
+```{r, cache = TRUE}
 a <- stationdf %>% select(start.station.name)
 b <- stationdf %>% select(end.station.name)
 #stationdf %>% na.omit() %>% group_by(start.station.name, end.station.name) %>% summarize(n = n()) %>% arrange(desc(n)) 
@@ -96,22 +91,40 @@ aNotInb <- sqldf('SELECT * FROM a EXCEPT SELECT * FROM b')
 bNotIna <- sqldf('SELECT * FROM b EXCEPT SELECT * FROM a')
 ```
 
-
 ```{r}
 library(stringr)
 notUsedStart <- subset(stationdf, start.station.name %in% aNotInb$start.station.name) %>% group_by(start.station.name) %>% summarize(n = n()) %>% print()
 notUsedEnd <- subset(stationdf, end.station.name %in% bNotIna$end.station.name) %>% group_by(end.station.name) %>% summarize(n = n()) %>% print()
 ```
 
-```{r}
-stationdf2 <- subset(stationdf, !(start.station.name %in% aNotInb$start.station.name) & !(end.station.name %in% bNotIna$end.station.name)) %>% arrange(start.station.name, end.station.name) %>% filter(start.station.name != "start station name")
-stationdf2 %>% group_by(end.station.name) %>% summarize(n = n()) %>% arrange(n)
+
+```{r, cache = TRUE}
+dummy1 <- subset(stationdf, !(start.station.name %in% aNotInb$start.station.name)) %>% group_by(start.station.name) %>% summarize(n1 = n())
+dummy2 <- subset(stationdf, !(end.station.name %in% bNotIna$end.station.name)) %>% group_by(end.station.name) %>% summarize(n2 = n())
+difFrame <- cbind(dummy1,dummy2) %>% group_by(start.station.name) %>% summarize(overflow = n2-n1) %>% arrange(desc(overflow)) 
+ggplot(head(difFrame), aes(x = start.station.name, y = overflow)) + geom_col()
+ggplot(tail(difFrame), aes(x = start.station.name, y = overflow)) + geom_col()
+
 ```
 
 ```{r}
-dummy1 <- stationdf2 %>% group_by(start.station.name) 
-dummy2 <- stationdf2 %>% group_by(end.station.name) 
-difFrame <- cbind(dummy1,dummy2) 
-difFrame
+Trafficdf <- clean %>% select(starttime, start.station.name, start.station.latitude, start.station.longitude, stoptime ,end.station.name ,end.station.latitude, end.station.longitude) %>% mutate(starttime = round_date(starttime, unit = "hour"), stoptime = round_date(stoptime, unit = "hour"), hourStart = hour(starttime), hourStop = hour(stoptime))
+print(Trafficdf)
+```
+
+```{r}
+#morning
+dumdum <- Trafficdf %>% filter(hourStart <12, hourStart > 5, hourStop <12, hourStop >5) %>% print()
+aa <- dumdum %>% select(hourStart, start.station.name) %>%group_by(start.station.name, hourStart) %>% summarize(nn = n())
+bb <- dumdum %>% select(hourStop, end.station.name) %>% group_by(end.station.name, hourStop) %>% summarize(nnn = n())
+print(aa);print(bb)
+#sum(aa$nn)
+#sum(bb$nnn)
+
+```
+
+
+```{r}
+
 ```
 
