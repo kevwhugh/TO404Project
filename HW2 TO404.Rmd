@@ -114,16 +114,19 @@ print(Trafficdf)
 
 ```{r, cache = TRUE}
 #morning
-dumdum <- Trafficdf %>% filter(hourStart <12, hourStart > 5, hourStop <12, hourStop >5) %>% print()
-aa <- dumdum %>% select(hourStart, start.station.name) %>%group_by(start.station.name, hourStart) %>% summarize(nn = n())
-bb <- dumdum %>% select(hourStop, end.station.name) %>% group_by(end.station.name, hourStop) %>% summarize(nnn = n())
+dumdum <- Trafficdf %>% filter(hourStart <12, hourStart > 5, hourStop <12, hourStop >5) #%>% print()
+aa <- dumdum %>% select(hourStart, start.station.name, start.station.latitude, start.station.longitude) %>% 
+  group_by(start.station.name, hourStart, start.station.longitude, start.station.latitude) %>% summarize(nn = n())
+bb <- dumdum %>% select(hourStop, end.station.name, end.station.latitude, end.station.longitude) %>% group_by(end.station.name, hourStop, end.station.longitude, end.station.latitude) %>% summarize(nnn = n())
 #print(bb); print(aa)
 
 a1 <- aa %>% mutate(id = paste(start.station.name, hourStart, sep = " @ ", collapse = NULL))
 b1 <- bb %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collapse = NULL))
 
 
-morning <- merge(a1, b1, by.x = 'id', by.y = 'id', all.x = TRUE) %>% select(id, nn, nnn) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
+morning <- merge(a1, b1, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id, start.station.latitude, start.station.longitude, end.station.latitude, end.station.longitude) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
+#select(id, nn, nnn) %>%
+#print(morning)
 morning %>% summarize(overflow = nnn-nn) %>% arrange(desc(overflow))
 morning %>% summarize(overflow = nnn-nn) %>% arrange(overflow)
 ```
