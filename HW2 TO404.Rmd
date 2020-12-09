@@ -99,9 +99,9 @@ notUsedEnd <- subset(stationdf, end.station.name %in% bNotIna$end.station.name) 
 
 
 ```{r, cache = TRUE}
-dummy1 <- subset(stationdf, !(start.station.name %in% aNotInb$start.station.name)) %>% group_by(start.station.name) %>% summarize(n1 = n())
-dummy2 <- subset(stationdf, !(end.station.name %in% bNotIna$end.station.name)) %>% group_by(end.station.name) %>% summarize(n2 = n())
-difFrame <- cbind(dummy1,dummy2) %>% group_by(start.station.name) %>% summarize(overflow = n2-n1) %>% arrange(desc(overflow)) 
+dummy1 <- subset(stationdf, !(start.station.name %in% aNotInb$start.station.name)) %>% group_by(start.station.name) %>% summarize(n1 = n()) %>% print()
+dummy2 <- subset(stationdf, !(end.station.name %in% bNotIna$end.station.name)) %>% group_by(end.station.name) %>% summarize(n2 = n()) %>% print()
+difFrame <- cbind(dummy1,dummy2) %>% group_by(start.station.name) %>% summarize(overflow = n2-n1) %>% arrange(desc(overflow))
 ggplot(head(difFrame), aes(x = start.station.name, y = overflow)) + geom_col()
 ggplot(tail(difFrame), aes(x = start.station.name, y = overflow)) + geom_col()
 
@@ -112,15 +112,20 @@ Trafficdf <- clean %>% select(starttime, start.station.name, start.station.latit
 print(Trafficdf)
 ```
 
-```{r}
+```{r, cache = TRUE}
 #morning
 dumdum <- Trafficdf %>% filter(hourStart <12, hourStart > 5, hourStop <12, hourStop >5) %>% print()
 aa <- dumdum %>% select(hourStart, start.station.name) %>%group_by(start.station.name, hourStart) %>% summarize(nn = n())
 bb <- dumdum %>% select(hourStop, end.station.name) %>% group_by(end.station.name, hourStop) %>% summarize(nnn = n())
-print(aa);print(bb)
-#sum(aa$nn)
-#sum(bb$nnn)
+#print(bb); print(aa)
 
+a1 <- aa %>% mutate(id = paste(start.station.name, hourStart, sep = " @ ", collapse = NULL))
+b1 <- bb %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collapse = NULL))
+
+
+morning <- merge(a1, b1, by.x = 'id', by.y = 'id', all.x = TRUE) %>% select(id, nn, nnn) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
+morning %>% summarize(overflow = nnn-nn) %>% arrange(desc(overflow))
+morning %>% summarize(overflow = nnn-nn) %>% arrange(overflow)
 ```
 
 
