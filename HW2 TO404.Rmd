@@ -124,11 +124,11 @@ a1 <- aa %>% mutate(id = paste(start.station.name, hourStart, sep = " @ ", colla
 b1 <- bb %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collapse = NULL))
 
 
-morning <- merge(a1, b1, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id, start.station.latitude, start.station.longitude, end.station.latitude, end.station.longitude) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
+morning <- merge(a1, b1, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id, start.station.latitude, start.station.longitude, end.station.latitude, end.station.longitude) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) %>% summarize(overflow = nnn-nn)
 #select(id, nn, nnn) %>%
-#print(morning)
-morning %>% summarize(overflow = nnn-nn) %>% arrange(desc(overflow))
-morning %>% summarize(overflow = nnn-nn) %>% arrange(overflow)
+print(morning)
+#morning  %>% arrange(desc(overflow))
+#morning %>% summarize(overflow = nnn-nn) %>% arrange(overflow)
 ```
 
 
