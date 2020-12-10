@@ -125,7 +125,7 @@ leaflet(map) %>%
   addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map$start.station.name, "<br>", "Total Overflow", map$overflow))
   setView(-73.96,40.75, zoom = 9)
   
-# This map shows the location of each station, blue circles indicate stations with overflow and red circles indicate stations with underflow. 
+# This map shows the location of each station, blue circles indicate stations with overflow and red cirlces indicate stations with underflow.
 ```
 
 
