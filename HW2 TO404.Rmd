@@ -25,8 +25,7 @@ library(lubridate)
 ```
 
 ```{r}
-test <- read.csv(file = "sample1.csv", stringsAsFactors = TRUE)
-head(test)
+test <- read.csv(file = "sample.csv", stringsAsFactors = TRUE)
 ```
 
 ##Cleaning 
@@ -103,7 +102,7 @@ notUsedEnd <- subset(stationdf, end.station.name %in% bNotIna$end.station.name) 
 
 # Likely Unnecessary 
 dummy1 <- subset(stationdf, !(start.station.name %in% aNotInb$start.station.name)) %>% group_by(start.station.name) %>% summarize(n1 = n()) %>% print()
-dummy2 <- subset(stationdf, !(end.station.name %in% bNotIna$end.station.name)) %>% group_by(end.station.name) %>% summarize(n2 = n()) %>% 
+dummy2 <- subset(stationdf, !(end.station.name %in% bNotIna$end.station.name)) %>% group_by(end.station.name) %>% summarize(n2 = n()) 
 difFrame <- cbind(dummy1,dummy2) %>% group_by(start.station.name) %>% summarize(overflow = n2-n1) %>% arrange(desc(overflow))
 head(difFrame)
 ggplot(head(difFrame), aes(x = start.station.name, y = overflow)) + geom_col()
@@ -185,7 +184,7 @@ a3 <- aa3 %>% mutate(id = paste(start.station.name, hourStart, sep = " @ ", coll
 b3 <- bb3 %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collapse = NULL))
 
 
-afternoon <- merge(a3, b3, by.x = 'id', by.y = 'id', all.x = TRUE) %>% select(id, nn, nnn) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
+afternoon <- merge(a3, b3, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
 afternoon$overflow <- afternoon$nnn - afternoon$nn 
 head(afternoon)
 
@@ -207,7 +206,7 @@ a4 <- aa4 %>% mutate(id = paste(start.station.name, hourStart, sep = " @ ", coll
 b4 <- bb4 %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collapse = NULL))
 
 
-rush_hour <- merge(a4, b4, by.x = 'id', by.y = 'id', all.x = TRUE) %>% select(id, nn, nnn) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
+rush_hour <- merge(a4, b4, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
 rush_hour$overflow <- rush_hour$nnn - rush_hour$nn 
 head(rush_hour)
 rush_hour %>% arrange(desc(overflow))
