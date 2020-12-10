@@ -127,7 +127,7 @@ pal = colorFactor(palette = c("blue", "red"), domain=map$overflow_range)
 leaflet(map) %>% 
   addCircles(lng = ~start.station.longitude, lat = ~start.station.latitude, color = ~pal(overflow_range)) %>%
   addTiles() %>%
-  addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map$start.station.name, "<br>", "Total Overflow", map$overflow))
+  addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map$start.station.name, "<br>", "Total Overflow", map$overflow)) %>%
   setView(-73.96,40.75, zoom = 9)
   
 # Map of Stations with most overflow 
@@ -136,7 +136,7 @@ map_top_overflow <- head(map[order(map$overflow, decreasing = TRUE), ], 15)
 leaflet(map_top_overflow) %>% 
   addCircles(lng = ~start.station.longitude, lat = ~start.station.latitude) %>%
   addTiles() %>%
-  addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map_top_overflow$start.station.name, "<br>", "Total Overflow", map_top_overflow$overflow))
+  addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map_top_overflow$start.station.name, "<br>", "Total Overflow", map_top_overflow$overflow)) %>%
   setView(-73.96,40.75, zoom = 9)
   
 # Map of Stations with Most Overflow 
@@ -161,7 +161,7 @@ a2 <- aa2 %>% mutate(id = paste(start.station.name, hourStart, sep = " @ ", coll
 b2 <- bb2 %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collapse = NULL))
 
 
-morning <- merge(a2, b2, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id, nn, nnn) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
+morning <- merge(a2, b2, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
 morning$overflow <- morning$nnn - morning$nn 
 head(morning)
 
