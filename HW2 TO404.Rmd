@@ -104,13 +104,8 @@ map %>% arrange(desc(overflow)) %>% head()
 
 # Understand map data 
 summary(map)
-# The most underflow (indicated by negative overflow) has 2,667 more departures thatn arrivals. The highest overflow has 3,014 more arrivals than departures. 
+# The most underflow (indicated by negative overflow) has 2,667 more departures than arrivals. The highest overflow is at station 2 Ave & E 31 St, which has 3,014 more arrivals than departures. 
 
-#Stations with Most Overflow 
-ggplot(head(map[order(map$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
-
-# Stations with Most Underflow
-ggplot(tail(map[order(map$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 
 # Map Overflow 
 library(leaflet)
@@ -120,9 +115,9 @@ set.seed(122)
 map$overflow_range = cut(map$overflow, 
                          breaks = c(-2668, 0, 3015), right = FALSE,
                          labels = c("underflow[-2668-0)", "overflow[0-3015)"))
+head(map)
 
 pal = colorFactor(palette = c("blue", "red"), domain=map$overflow_range)
-
 
 leaflet(map) %>% 
   addCircles(lng = ~start.station.longitude, lat = ~start.station.latitude, color = ~pal(overflow_range)) %>%
@@ -130,6 +125,16 @@ leaflet(map) %>%
   addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map$start.station.name, "<br>", "Total Overflow", map$overflow)) %>%
   setView(-73.96,40.75, zoom = 9)
   
+# This map shows the location of each station, blue circles indicate stations with overflow and red cirlces indicate stations with underflow.
+```
+
+
+```{r}
+# Overflow analysis by station
+
+# Graph of Stations with Most Overflow 
+ggplot(head(map[order(map$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+
 # Map of Stations with most overflow 
 map_top_overflow <- head(map[order(map$overflow, decreasing = TRUE), ], 15)
 
@@ -138,16 +143,33 @@ leaflet(map_top_overflow) %>%
   addTiles() %>%
   addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map_top_overflow$start.station.name, "<br>", "Total Overflow", map_top_overflow$overflow)) %>%
   setView(-73.96,40.75, zoom = 9)
+```
+
+
+```{r}
+# Understanding underflow based on stations 
+
+# Graph of Stations with Most Underflow
+ggplot(tail(map[order(map$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+
+# Map of stations with most underflow 
+map_top_underflow <- head(map[order(map$overflow, decreasing = FALSE), ], 15)
+
+leaflet(map_top_underflow) %>% 
+  addCircles(lng = ~start.station.longitude, lat = ~start.station.latitude) %>%
+  addTiles() %>%
+  addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map_top_underflow$start.station.name, "<br>", "Total Overflow", map_top_underflow$overflow))
+  setView(-73.96,40.75, zoom = 9)
   
-# Map of Stations with Most Overflow 
-#map <- head(map[order(map$overflow, decreasing = TRUE), ], 100)
-#leaflet(map) %>%
- # addTiles() %>%
- # addMarkers(popup = paste("Station Name:"= map$start.station.name))  %>%
- # setView(-73.96,40.75, zoom = 9)
+  ################## In explanation, based on looking at the map, look at if there are any places to add a new station.
+```
 
-  # In explanation, based on looking at the map, look at if there are any places to add a new station. 
 
+```{r}
+# Is there more overflow or underflow? 
+map %>% group_by(overflow_range) %>% summarize(n = n()) %>% ggplot(aes(overflow_range, n)) + geom_col() + ggtitle("Number of Start Stations with Overflow and Underflow")
+
+#The above bar graph illustrates that there are more overflow than underflow. This indicates that TBUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
 ```
 
 ```{r, cache = TRUE}
