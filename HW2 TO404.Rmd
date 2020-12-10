@@ -28,7 +28,7 @@ library(leaflet)
 ```
 
 ```{r}
-test <- read.csv(file = "sample.csv", stringsAsFactors = TRUE)
+test <- read.csv(file = "sample1.csv", stringsAsFactors = TRUE)
 ```
 
 ##Cleaning 
@@ -102,18 +102,51 @@ head(map)
 map$overflow <- map$nnn - map$nn 
 map %>% arrange(desc(overflow)) %>% head()
 
+# Understand map data 
+summary(map)
+# The most underflow (indicated by negative overflow) has 2,667 more departures thatn arrivals. The highest overflow has 3,014 more arrivals than departures. 
+
 #Stations with Most Overflow 
 ggplot(head(map[order(map$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 
 # Stations with Most Underflow
 ggplot(tail(map[order(map$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 
+# Map Overflow 
+library(leaflet)
+set.seed(122)
+
+# Create overflow range to define the type as follows
+map$overflow_range = cut(map$overflow, 
+                         breaks = c(-2668, 0, 3015), right = FALSE,
+                         labels = c("underflow[-2668-0)", "overflow[0-3015)"))
+
+pal = colorFactor(palette = c("blue", "red"), domain=map$overflow_range)
+
+
+leaflet(map) %>% 
+  addCircles(lng = ~start.station.longitude, lat = ~start.station.latitude, color = ~pal(overflow_range)) %>%
+  addTiles() %>%
+  addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map$start.station.name, "<br>", "Total Overflow", map$overflow))
+  setView(-73.96,40.75, zoom = 9)
+  
+# Map of Stations with most overflow 
+map_top_overflow <- head(map[order(map$overflow, decreasing = TRUE), ], 15)
+
+leaflet(map_top_overflow) %>% 
+  addCircles(lng = ~start.station.longitude, lat = ~start.station.latitude) %>%
+  addTiles() %>%
+  addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map_top_overflow$start.station.name, "<br>", "Total Overflow", map_top_overflow$overflow))
+  setView(-73.96,40.75, zoom = 9)
+  
 # Map of Stations with Most Overflow 
 #map <- head(map[order(map$overflow, decreasing = TRUE), ], 100)
 #leaflet(map) %>%
  # addTiles() %>%
  # addMarkers(popup = paste("Station Name:"= map$start.station.name))  %>%
  # setView(-73.96,40.75, zoom = 9)
+
+  # In explanation, based on looking at the map, look at if there are any places to add a new station. 
 
 ```
 
@@ -132,12 +165,14 @@ morning <- merge(a2, b2, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id
 morning$overflow <- morning$nnn - morning$nn 
 head(morning)
 
+
+
 #Stations with Most Overflow in Morning 
 ggplot(head(morning[order(morning$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 
 # Stations with Most Underflow in Morning 
 # ?????????????????????????? what is going on with the # of bars being shown 
-ggplot(tail(morning[order(morning$overflow, decreasing = TRUE),], 10), aes(x = start.station.name, y = overflow)) + geom_col()
+ggplot(tail(morning[order(morning$overflow, decreasing = TRUE),], 9), aes(x = start.station.name, y = overflow)) + geom_col()
 ```
 
 ```{r, cache = TRUE}
