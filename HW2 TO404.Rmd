@@ -133,7 +133,7 @@ head(b1)
 map <- merge(a1, b1, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id, start.station.latitude, start.station.longitude, end.station.latitude, end.station.longitude) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
 head(map)
 map$overflow <- map$nnn - map$nn 
-head(map)
+map %>% arrange(desc(overflow)) %>% head()
 
 #Stations with Most Overflow 
 ggplot(head(map[order(map$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
@@ -230,7 +230,7 @@ a5 <- aa5 %>% mutate(id = paste(start.station.name, hourStart, sep = " @ ", coll
 b5 <- bb5 %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collapse = NULL))
 
 
-night <- merge(a5, b5, by.x = 'id', by.y = 'id', all.x = TRUE) %>% select(id, nn, nnn) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
+night <- merge(a5, b5, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
 night$overflow <- night$nnn - night$nn 
 head(night)
 
@@ -238,5 +238,5 @@ head(night)
 ggplot(head(night[order(night$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 
 # Stations with Most Underflow at Night 
-ggplot(tail(rush_night[order(night$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+ggplot(tail(night[order(night$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 ```
