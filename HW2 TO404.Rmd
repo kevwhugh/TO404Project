@@ -22,6 +22,9 @@ To begin, I needed to load in the set. I combined all of the data into one csv u
 #Load packages
 library(tidyverse)
 library(lubridate)
+library(stringr)
+library(gganimate)
+library(leaflet)
 ```
 
 ```{r}
@@ -72,42 +75,6 @@ clean %>% group_by(day) %>% summarize(n=n()) %>% ggplot(aes("", n, fill = day)) 
 clean %>% group_by(month) %>% summarize(n = n()) %>% ggplot(aes(month, n, fill = month)) + geom_col()
 clean %>% group_by(gender) %>% summarize(meantripdur = median(tripduration/60))%>%  ggplot(aes(gender,meantripdur, fill = gender)) + geom_col()
 clean %>% group_by(month) %>% summarize(meantripdur = median(tripduration/60))%>%  ggplot(aes(month,meantripdur, fill = month)) + geom_col()
-```
-```{r}
-library(gganimate)
-```
-
-```{r}
-stationdf <- clean %>% select(starttime, start.station.name, start.station.latitude, start.station.longitude, stoptime ,end.station.name ,end.station.latitude, end.station.longitude) %>% mutate(starttime = round_date(starttime, unit = "hour"), stoptime = round_date(stoptime, unit = "hour"), hourStart = hour(starttime), hourStop = hour(stoptime))
-```
-
-```{r, cache = TRUE}
-a <- stationdf %>% select(start.station.name)
-b <- stationdf %>% select(end.station.name)
-#stationdf %>% na.omit() %>% group_by(start.station.name, end.station.name) %>% summarize(n = n()) %>% arrange(desc(n)) 
-
-require(sqldf)
-aNotInb <- sqldf('SELECT * FROM a EXCEPT SELECT * FROM b')
-bNotIna <- sqldf('SELECT * FROM b EXCEPT SELECT * FROM a')
-```
-
-```{r}
-library(stringr)
-notUsedStart <- subset(stationdf, start.station.name %in% aNotInb$start.station.name) %>% group_by(start.station.name) %>% summarize(n = n()) %>% print()
-notUsedEnd <- subset(stationdf, end.station.name %in% bNotIna$end.station.name) %>% group_by(end.station.name) %>% summarize(n = n()) %>% print()
-```
-
-
-```{r, cache = TRUE}
-
-# Likely Unnecessary 
-dummy1 <- subset(stationdf, !(start.station.name %in% aNotInb$start.station.name)) %>% group_by(start.station.name) %>% summarize(n1 = n()) %>% print()
-dummy2 <- subset(stationdf, !(end.station.name %in% bNotIna$end.station.name)) %>% group_by(end.station.name) %>% summarize(n2 = n()) 
-difFrame <- cbind(dummy1,dummy2) %>% group_by(start.station.name) %>% summarize(overflow = n2-n1) %>% arrange(desc(overflow))
-head(difFrame)
-ggplot(head(difFrame), aes(x = start.station.name, y = overflow)) + geom_col()
-ggplot(tail(difFrame), aes(x = start.station.name, y = overflow)) + geom_col()
-
 ```
 
 ```{r}
