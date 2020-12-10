@@ -78,12 +78,12 @@ clean %>% group_by(month) %>% summarize(meantripdur = median(tripduration/60))%>
 ```
 
 ```{r}
-Trafficdf <- clean %>% select(starttime, start.station.name, start.station.latitude, start.station.longitude, stoptime ,end.station.name ,end.station.latitude, end.station.longitude) %>% mutate(starttime = round_date(starttime, unit = "hour"), stoptime = round_date(stoptime, unit = "hour"), hourStart = hour(starttime), hourStop = hour(stoptime))
+Trafficdf <- clean %>% select(starttime, start.station.name, start.station.latitude, start.station.longitude, stoptime ,end.station.name ,end.station.latitude, end.station.longitude, day) %>% mutate(starttime = round_date(starttime, unit = "hour"), stoptime = round_date(stoptime, unit = "hour"), hourStart = hour(starttime), hourStop = hour(stoptime))
 head(Trafficdf)
 ```
 
 
-```{r}
+```{r, cache = TRUE}
 # Map 
 dumdum <- Trafficdf 
 aa <- dumdum %>% select(start.station.name, start.station.latitude, start.station.longitude) %>% 
@@ -119,7 +119,7 @@ ggplot(tail(map[order(map$overflow, decreasing = TRUE),], 5), aes(x = start.stat
 
 ```{r, cache = TRUE}
 #morning
-dumdum2 <- Trafficdf %>% filter(hourStart <12, hourStart > 5, hourStop <12, hourStop >5) %>% print()
+dumdum2 <- Trafficdf %>% filter(hourStart <12, hourStart > 5, hourStop <12, hourStop >5)
 aa2 <- dumdum2 %>% select(hourStart, start.station.name) %>%group_by(start.station.name, hourStart) %>% summarize(nn = n())
 bb2 <- dumdum2 %>% select(hourStop, end.station.name) %>% group_by(end.station.name, hourStop) %>% summarize(nnn = n())
 #print(bb); print(aa)
@@ -176,7 +176,7 @@ b4 <- bb4 %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collaps
 rush_hour <- merge(a4, b4, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
 rush_hour$overflow <- rush_hour$nnn - rush_hour$nn 
 head(rush_hour)
-rush_hour %>% arrange(desc(overflow))
+#rush_hour %>% arrange(desc(overflow))
 
 #Stations with Most Overflow During Afternoon Rush Hour
 ggplot(head(rush_hour[order(rush_hour$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
@@ -188,7 +188,7 @@ ggplot(tail(rush_hour[order(rush_hour$overflow, decreasing = TRUE),], 5), aes(x 
 ```{r, cache = TRUE}
 
 # Night 
-dumdum5 <- Trafficdf %>% filter(hourStart < 23, hourStart >= 20, hourStop < 23, hourStop >= 20) %>% print()
+dumdum5 <- Trafficdf %>% filter(hourStart < 23, hourStart >= 20, hourStop < 23, hourStop >= 20)
 aa5 <- dumdum5 %>% select(hourStart, start.station.name) %>%group_by(start.station.name, hourStart) %>% summarize(nn = n())
 bb5 <- dumdum5 %>% select(hourStop, end.station.name) %>% group_by(end.station.name, hourStop) %>% summarize(nnn = n())
 #print(bb); print(aa)
@@ -207,3 +207,25 @@ ggplot(head(night[order(night$overflow, decreasing = TRUE),], 5), aes(x = start.
 # Stations with Most Underflow at Night 
 ggplot(tail(night[order(night$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 ```
+
+```{r}
+aa6 <- Trafficdf %>% select(day, start.station.name) %>%group_by(start.station.name, day) %>% summarize(nn = n())
+bb6 <- Trafficdf %>% select(day, end.station.name) %>% group_by(end.station.name, day) %>% summarize(nnn = n())
+#print(bb); print(aa)
+
+a6 <- aa6 %>% mutate(id = paste(start.station.name, day, sep = " @ ", collapse = NULL))
+b6 <- bb6 %>% mutate(id = paste(end.station.name, day, sep = " @ ", collapse = NULL))
+
+
+days <- merge(a6, b6, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
+days$overflow <- days$nnn - days$nn 
+#days
+
+#Stations with Most Overflow per day
+ggplot(head(days[order(days$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+
+# Stations with Most Underflow per day
+ggplot(tail(days[order(days$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+```
+
+
