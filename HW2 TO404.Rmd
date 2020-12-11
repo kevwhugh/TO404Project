@@ -296,13 +296,11 @@ map %>% filter(overflow == 0) %>% arrange(desc(nn,nnn)) %>% nrow()
 
 allHour <- rbind(morning, afternoon, rush_hour, night)
 #head(allHour)
-m1<-lm(allHour$overflow ~ allHour$hourStop) 
-m2<-lm(allHour$overflow ~ allHour$hourStart) #times of start and stop affect overflow 
-m3<-lm(days$overflow ~ days$day.x) # day does not affect overflow much
-summary(m1); summary(m2); summary(m3)
+m1<-lm(allHour$overflow ~ allHour$hourStart) #times of start and stop affect overflow 
+m2<-lm(days$overflow ~ days$day.x) # day does not affect overflow much
+summary(m1); summary(m2)
 
-ggplot(allHour, aes(hourStart, overflow, group = hourStart)) + geom_boxplot() 
-ggplot(allHour, aes(hourStop, overflow, group = hourStop)) + geom_boxplot() 
-ggplot(days, aes(day.x, overflow, group = day.x)) + geom_boxplot() 
+ggplot(allHour, aes(hourStart, overflow, group = hourStart)) + geom_boxplot() + ylim(-30, 30) + geom_abline(slope = 0, intercept = 0)
+ggplot(days, aes(day.x, overflow, group = day.x)) + geom_boxplot() + ylim(-30, 30) + geom_abline(slope = 0, intercept = 0)
 ```
 
