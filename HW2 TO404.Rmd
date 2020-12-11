@@ -185,17 +185,17 @@ b2 <- bb2 %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collaps
 
 morning <- merge(a2, b2, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
 morning$overflow <- morning$nnn - morning$nn 
-morning <- morning %>% group_by(start.station.name) %>% summarize(overflow = sum(overflow))
-morning %>% arrange(desc(overflow)) %>% head()
+morningSum <- morning %>% group_by(start.station.name) %>% summarize(overflow = sum(overflow))
+morningSum %>% arrange(desc(overflow)) %>% head()
 
 
 
 #Stations with Most Overflow in Morning 
-ggplot(head(morning[order(morning$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+ggplot(head(morningSum[order(morningSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 
 # Stations with Most Underflow in Morning 
 # ?????????????????????????? what is going on with the # of bars being shown 
-ggplot(tail(morning[order(morning$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+ggplot(tail(morningSum[order(morningSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 ```
 
 ```{r, cache = TRUE}
@@ -211,14 +211,14 @@ b3 <- bb3 %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collaps
 
 afternoon <- merge(a3, b3, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
 afternoon$overflow <- afternoon$nnn - afternoon$nn 
-afternoon <- afternoon %>% group_by(start.station.name) %>% summarize(overflow = sum(overflow))
-afternoon %>% arrange(desc(overflow)) %>% head()
+afternoonSum <- afternoon %>% group_by(start.station.name) %>% summarize(overflow = sum(overflow))
+afternoonSum %>% arrange(desc(overflow)) %>% head()
 
 #Stations with Most Overflow in Early Afternoon 
-ggplot(head(afternoon[order(afternoon$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+ggplot(head(afternoonSum[order(afternoonSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 
 # Stations with Most Underflow in Early Afternoon 
-ggplot(tail(afternoon[order(afternoon$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+ggplot(tail(afternoonSum[order(afternoonSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 ```
 
 ```{r, cache = TRUE}
@@ -234,14 +234,14 @@ b4 <- bb4 %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collaps
 
 rush_hour <- merge(a4, b4, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
 rush_hour$overflow <- rush_hour$nnn - rush_hour$nn 
-rush_hour <- rush_hour %>% group_by(start.station.name) %>% summarize(overflow = sum(overflow))
-rush_hour %>% arrange(desc(overflow)) %>% head()
+rush_hourSum <- rush_hour %>% group_by(start.station.name) %>% summarize(overflow = sum(overflow))
+rush_hourSum %>% arrange(desc(overflow)) %>% head()
 
 #Stations with Most Overflow During Afternoon Rush Hour
-ggplot(head(rush_hour[order(rush_hour$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+ggplot(head(rush_hourSum[order(rush_hourSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 
 # Stations with Most Underflow During Afternoon Rush Hour 
-ggplot(tail(rush_hour[order(rush_hour$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+ggplot(tail(rush_hourSum[order(rush_hourSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 ```
 
 ```{r, cache = TRUE}
@@ -258,14 +258,14 @@ b5 <- bb5 %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collaps
 
 night <- merge(a5, b5, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
 night$overflow <- night$nnn - night$nn 
-night <- night %>% group_by(start.station.name) %>% summarize(overflow = sum(overflow))
-night %>% arrange(desc(overflow)) %>% head()
+nightSum <- night %>% group_by(start.station.name) %>% summarize(overflow = sum(overflow))
+nightSum %>% arrange(desc(overflow)) %>% head()
 
 #Stations with Most Overflow at Night  
-ggplot(head(night[order(night$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+ggplot(head(nightSum[order(nightSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 
 # Stations with Most Underflow at Night 
-ggplot(tail(night[order(night$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
+ggplot(tail(nightSum[order(nightSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 ```
 
 ```{r}
@@ -288,4 +288,21 @@ ggplot(head(days[order(days$overflow, decreasing = TRUE),], 5), aes(x = id, y = 
 ggplot(tail(days[order(days$overflow, decreasing = TRUE),], 5), aes(x = id, y = overflow)) + geom_col()
 ```
 
+```{r}
+#top 20 used stations which didn't have ANY overflow or underflow
+map %>% filter(overflow == 0) %>% arrange(desc(nn,nnn)) %>% head(20)
+#how many stations didn't have ANY overflow or underflow
+map %>% filter(overflow == 0) %>% arrange(desc(nn,nnn)) %>% nrow() 
+
+allHour <- rbind(morning, afternoon, rush_hour, night)
+#head(allHour)
+m1<-lm(allHour$overflow ~ allHour$hourStop) 
+m2<-lm(allHour$overflow ~ allHour$hourStart) #times of start and stop affect overflow 
+m3<-lm(days$overflow ~ days$day.x) # day does not affect overflow much
+summary(m1); summary(m2); summary(m3)
+
+ggplot(allHour, aes(hourStart, overflow, group = hourStart)) + geom_boxplot() 
+ggplot(allHour, aes(hourStop, overflow, group = hourStop)) + geom_boxplot() 
+ggplot(days, aes(day.x, overflow, group = day.x)) + geom_boxplot() 
+```
 
