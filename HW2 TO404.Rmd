@@ -309,6 +309,6 @@ m2<-lm(days$overflow ~ days$day.x) # day does not affect overflow much
 summary(m1); summary(m2)
 
 ggplot(allHour, aes(hourStart, overflow, group = hourStart)) + geom_boxplot() + ylim(-70, 70) + geom_abline(slope = 0, intercept = 0) +xlab("Hour") + ylab("Overflow") + ggtitle("Overflow by Hour of Day")
-ggplot(days, aes(day.x, overflow, group = day.x)) + geom_boxplot() + ylim(-50, 50) + geom_abline(slope = 0, intercept = 0) +xlab("Day") + ylab("Overflow") + ggtitle("Overflow by Day of the Week")
+ggplot(days, aes(day.x, overflow, group = day.x)) + geom_boxplot() + ylim(-50, 50) + geom_abline(slope = 0, intercept = 0) +xlab("Day") + ylab("Overflow") + ggtitle("Overflow by Days of the Week")
 ```
 
