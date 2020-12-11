@@ -129,7 +129,7 @@ leaflet(map) %>%
 ```
 
 
-```{r}
+```{r, cache = TRUE}
 # Overflow analysis by station
 
 # Graph of Stations with Most Overflow 
@@ -146,7 +146,7 @@ leaflet(map_top_overflow) %>%
 ```
 
 
-```{r}
+```{r, cache = TRUE}
 # Understanding underflow based on stations 
 
 # Graph of Stations with Most Underflow
@@ -158,7 +158,7 @@ map_top_underflow <- head(map[order(map$overflow, decreasing = FALSE), ], 15)
 leaflet(map_top_underflow) %>% 
   addCircles(lng = ~start.station.longitude, lat = ~start.station.latitude) %>%
   addTiles() %>%
-  addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map_top_underflow$start.station.name, "<br>", "Total Overflow", map_top_underflow$overflow))
+  addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map_top_underflow$start.station.name, "<br>", "Total Overflow", map_top_underflow$overflow)) %>% 
   setView(-73.96,40.75, zoom = 9)
   
   ################## In explanation, based on looking at the map, look at if there are any places to add a new station.
@@ -200,7 +200,7 @@ ggplot(tail(morningSum[order(morningSum$overflow, decreasing = TRUE),], 5), aes(
 
 ```{r, cache = TRUE}
 # Afternoon 
-dumdum3 <- Trafficdf %>% filter(hourStart <16, hourStart >= 12, hourStop <16, hourStop >=12) %>% print()
+dumdum3 <- Trafficdf %>% filter(hourStart <16, hourStart >= 12, hourStop <16, hourStop >=12) 
 aa3 <- dumdum3 %>% select(hourStart, start.station.name) %>%group_by(start.station.name, hourStart) %>% summarize(nn = n())
 bb3 <- dumdum3 %>% select(hourStop, end.station.name) %>% group_by(end.station.name, hourStop) %>% summarize(nnn = n())
 #print(bb); print(aa)
@@ -268,7 +268,7 @@ ggplot(head(nightSum[order(nightSum$overflow, decreasing = TRUE),], 5), aes(x = 
 ggplot(tail(nightSum[order(nightSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col()
 ```
 
-```{r}
+```{r, cache = TRUE}
 aa6 <- Trafficdf %>% select(day, start.station.name) %>%group_by(start.station.name, day) %>% summarize(nn = n())
 bb6 <- Trafficdf %>% select(day, end.station.name) %>% group_by(end.station.name, day) %>% summarize(nnn = n())
 #print(bb); print(aa)
@@ -288,7 +288,7 @@ ggplot(head(days[order(days$overflow, decreasing = TRUE),], 5), aes(x = id, y = 
 ggplot(tail(days[order(days$overflow, decreasing = TRUE),], 5), aes(x = id, y = overflow)) + geom_col()
 ```
 
-```{r}
+```{r, cache = TRUE}
 #top 20 used stations which didn't have ANY overflow or underflow
 map %>% filter(overflow == 0) %>% arrange(desc(nn,nnn)) %>% head(20)
 #how many stations didn't have ANY overflow or underflow
