@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ##Beginning 
 
-To begin, I needed to load in the set. I combined all of the data into one csv using the command prompt to avoid a long compile time in RStudio. I also needed to load in the packages, tidyverse and lubridate, that I would need to use to manipulate the data and perform descriptive statistics in my analysis. From here, I took a random sample of the data and and assigned it to a dataframe "test" in order for me to observe and clean it. 
+To begin, we needed to load in the set. We combined all of the data into one csv using the command prompt to avoid a long compile time in RStudio. We also needed to load in the packages, tidyverse and lubridate, that we would need to use to manipulate the data and perform descriptive statistics in my analysis. From here, we took a random sample of the data and and assigned it to a dataframe "test" in order for us to observe and clean it. 
 
 
 ```{r}
@@ -28,19 +28,18 @@ library(leaflet)
 ```
 
 ```{r}
-test <- read.csv(file = "sample.csv", stringsAsFactors = TRUE)
+test <- read.csv(file = "sample1.csv", stringsAsFactors = TRUE)
 ```
 
 ##Cleaning 
-Upon realizing that the data consisted of only factor type variables, I needed to reassign ones I wished to use to their respective types so I could formulate summary stats and make true observations. 
+Upon realizing that the data consisted of only factor type variables, we needed to reassign ones we wished to use to their respective types so we could formulate summary stats and make true observations. 
 ```{r}
 clean <- test %>% mutate(birth.year = as.numeric(as.character(birth.year)), tripduration = as.numeric(as.character(tripduration)), starttime = as_datetime(as.character(starttime)), stoptime = as_datetime(as.character(stoptime)), start.station.latitude = as.numeric(as.character(start.station.latitude)), start.station.longitude = as.numeric(as.character(start.station.longitude)), end.station.latitude = as.numeric(as.character(end.station.latitude)), end.station.longitude= as.numeric(as.character(end.station.longitude)), month = month(starttime, label = TRUE), day = wday(starttime, label = TRUE), start.station.name = as.character(start.station.name), end.station.name = as.character(end.station.name)  ) %>% filter(usertype != "usertype")
 head(clean)
-
 ```
 
 ##Basic Summary Stats
-Below, I computed basic summary stats of variables I believed were important for understanding the riders and stations for citiBike. I started by seeing how many users of each type there were, how many users were of which gender, average ages of bikers, hot spot stations, and how long people typically rode. We can see that most bikers in 2019 were subsribers to the program, and that men rode more than women, and the average age of the subscribers was lower than that of customers. We see that while there are some hot spot stations, many of the stations get good use, however there are some which are only used a handful of times throughout the year. Finally, you can see that the set is slightly skewed to the right becuase the mean is higher than the median; some riders may take long trips as exercise and these are more of an anomoly. The plots I created demonstrate the distribution of customers.
+Below, we computed basic summary stats of variables we believed were important for understanding the riders and stations for citiBike. We started by seeing how many users of each type there were, how many users were of which gender, average ages of bikers, hot spot stations, and how long people typically rode. We can see that most bikers in 2019 were subscribers to the program, and that men rode more than women, and the average age of the subscribers was lower than that of customers. We see that while there are some hot spot stations, many of the stations get good use, however there are some which are only used a handful of times throughout the year. Finally, you can see that the set is slightly skewed to the right because the mean is higher than the median; some riders may take long trips as exercise and these are more of an anomoly. The plots we created demonstrate the distribution of customers.
 
 Numbers
 ```{r, cache = TRUE}
@@ -60,8 +59,8 @@ clean %>% group_by(usertype) %>% mutate(age = 2019-birth.year) %>% ggplot(aes(us
 
 ##Ridership Analysis
 
-In this section, I dive deeper into the data to understand some of the trends lying within. To start, I wanted to analyze if days of the week or months have an impact on riders and their trips. As shown in the pie chart, the days of the week do not fully impact the amount of riders, however sunday has a much smaller number of riders than the other 6. Months, however, seem to affect the amount of usage, most likely due to weather. The winter months see a large decrease in usage compared to summer/warm months, September seeing the most. I attribute this to the weather being nicer and students going back to school. Furthermore, the duration of rides in a month is distributed like the amount of rides per month. People likely keep their trips shorter, ride faster, or choose to travel via motor vehicle. 
-From here, I wanted to see if age affects the trip durations; you can see that the younger riders typically ride longer trips with 1969, 1937, and 1939 also high up there. It seems that some riders are likely lying about their age and skewing the data slightly. Finally, I checked the average times that riders typically start and stop, and it would seem like most rides occur in the afternoon, specifically in the 3:00PM range. 
+In this section, we dive deeper into the data to understand some of the trends lying within. To start, we wanted to analyze if days of the week or months have an impact on riders and their trips. As shown in the pie chart, the days of the week do not fully impact the amount of riders, however Sunday has a much smaller number of riders than the other 6. Months, however, seem to affect the amount of usage, most likely due to weather. The winter months see a large decrease in usage compared to summer/warm months, September seeing the most. I attribute this to the weather being nicer and students going back to school. Furthermore, the duration of rides in a month is distributed like the amount of rides per month. People likely keep their trips shorter, ride faster, or choose to travel via motor vehicle. 
+From here, we wanted to see if age affects the trip durations; you can see that the younger riders typically ride longer trips with 1969, 1937, and 1939 also high up there. It seems that some riders are likely lying about their age and skewing the data slightly. Finally, we checked the average times that riders typically start and stop, and it would seem like most rides occur in the afternoon, specifically in the 3:00PM range. 
 ```{r, cache = TRUE}
 clean %>% group_by(month) %>% summarize(n = n()) %>% arrange(desc(n))
 clean %>% group_by(day) %>% summarize(n=n()) %>% arrange(desc(n)) 
@@ -71,25 +70,36 @@ mean.POSIXct(clean$stoptime)
 ```
 
 ```{r, cache = TRUE}
+# Pie chart illustrating distribution of riders on days 
 clean %>% group_by(day) %>% summarize(n=n()) %>% ggplot(aes("", n, fill = day)) + geom_bar(stat = 'identity', width = 1, color = "white") + coord_polar("y", start=0) + theme_void() + labs(title = "Distibution of Riders On Days")
+# Bar graph illustrating how number of rides varies by month 
 clean %>% group_by(month) %>% summarize(n = n()) %>% ggplot(aes(month, n, fill = month)) + geom_col() + xlab("Month") + ylab("Number of Rides") + ggtitle("Number of Rides Per Month")
+# Bar graph illustrating trip duration for each gender 
 clean %>% group_by(gender) %>% summarize(meantripdur = median(tripduration/60))%>%  ggplot(aes(gender,meantripdur, fill = gender)) + geom_col() + xlab("Gender") + ylab("Average Trip Duration") + ggtitle("Trip Durations of Different Genders")
+# Bar graph illustrating how trip duration varies by month 
 clean %>% group_by(month) %>% summarize(meantripdur = median(tripduration/60))%>%  ggplot(aes(month,meantripdur, fill = month)) + geom_col() + xlab("Month") + ylab("Average Trip Duration") + ggtitle("Trip Durations by Month")
 ```
 
+
+
+
+
+## Asymmetric Traffic Analysis 
+In this section, we analyze asymmetric traffic patterns. Asymmetric traffic is when there are more bikes coming in than leaving (overflow), or when there are more bikes leaving than coming in (underflow). We looked at asymmetric traffic as a whole, by station, and at given periods of time. We calculated overflow as arrivals - departures. Negative overflow indicates underflow. 
+
+# Preliminary understanding of overflow data: The station with the most underflow has 2,667 more departures than arrivals. This occurs at 	Columbus Ave & W 72 St. The highest overflow occurs at station 2 Ave & E 31 St, which has 3,014 more arrivals than departures. Between all the stations, there is little to no total over/underflow. The median overflow is 0.00 while the mean overflow is 0.34.
 ```{r}
+# Create new data frame Trafficdf, limiting number of variables and creating hourStart and hourStop variables 
 Trafficdf <- clean %>% select(starttime, start.station.name, start.station.latitude, start.station.longitude, stoptime ,end.station.name ,end.station.latitude, end.station.longitude, day) %>% mutate(starttime = round_date(starttime, unit = "hour"), stoptime = round_date(stoptime, unit = "hour"), hourStart = hour(starttime), hourStop = hour(stoptime))
-#head(Trafficdf)
 ```
 
-
 ```{r, cache = TRUE}
-# Map 
+# Create new variables to count the number of times bikes left from each station and started from each station
 dumdum <- Trafficdf 
 aa <- dumdum %>% select(start.station.name, start.station.latitude, start.station.longitude) %>% 
   group_by(start.station.name, start.station.longitude, start.station.latitude) %>% summarize(nn = n())
 #head(aa)
-bb <- dumdum %>% select(end.station.name, end.station.latitude, end.station.longitude) %>% group_by(end.station.name, end.station.longitude, end.station.latitude) %>% summarize(nnn = n())
+bb <- dumdum %>% select(end.station.name) %>% group_by(end.station.name, end.station.longitude, end.station.latitude) %>% summarize(nnn = n())
 #head(bb)
 
 a1 <- aa %>% mutate(id = paste(start.station.name, sep = " @ ", collapse = NULL))
@@ -97,17 +107,26 @@ a1 <- aa %>% mutate(id = paste(start.station.name, sep = " @ ", collapse = NULL)
 b1 <- bb %>% mutate(id = paste(end.station.name, sep = " @ ", collapse = NULL))
 #head(b1)
 
-map <- merge(a1, b1, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id, start.station.latitude, start.station.longitude, end.station.latitude, end.station.longitude) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
+# Calculate overflow for each station (negative overflow indicates underflow)
+map <- merge(a1, b1, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id, start.station.latitude, start.station.longitude) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) %>% filter(id != "NULL")
 #head(map)
 map$overflow <- map$nnn - map$nn 
 map %>% arrange(desc(overflow)) %>% head()
 
-# Understand map data 
-summary(map)
-# The most underflow (indicated by negative overflow) has 2,667 more departures than arrivals. The highest overflow is at station 2 Ave & E 31 St, which has 3,014 more arrivals than departures. 
+```
+
+```{r, cache = TRUE}
+summary(map$overflow)
+```
 
 
-# Map Overflow 
+# Overflow Analysis by Station (Year 2019) 
+According to the below graph, 2 Ave & E 31st St has by far the most overflow, followed by W 45 St & 6 Ave, Henry St & Grand St, University Pl & E 14 St, and then W 55 St & 6 Ave. The map provides a visual of the stations with the most overflow. 12 of the 15 stations with the most overflow are located in the downtown area of Manhattan, thus indicating a potential capacity problem. We suggest that storage capacity should be increased for a station in this area, preferably one of the stations with the largest overflow.
+```{r, cache = TRUE}
+# Graph of Stations with Most Overflow 
+ggplot(head(map[order(map$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col() +xlab("Station") + ylab("Overflow") + ggtitle("Stations with Most Overflow")
+
+# Map of Stations with most overflow 
 library(leaflet)
 set.seed(122)
 
@@ -115,42 +134,23 @@ set.seed(122)
 map$overflow_range = cut(map$overflow, 
                          breaks = c(-2668, 0, 3015), right = FALSE,
                          labels = c("underflow[-2668-0)", "overflow[0-3015)"))
-#head(map)
 
 pal = colorFactor(palette = c("blue", "red"), domain=map$overflow_range)
 
-#leaflet(map) %>% 
- # addCircles(lng = ~start.station.longitude, lat = ~start.station.latitude, color = ~pal(overflow_range)) %>%
- # addTiles() %>%
- # addMarkers(~start.station.longitude, ~start.station.latitude, popup = paste("Station Name:", map$start.station.name, "<br>", "Total Overflow", map$overflow)) %>%
- # setView(-73.96,40.75, zoom = 9)
-  
-# This map shows the location of each station, blue circles indicate stations with overflow and red cirlces indicate stations with underflow.
-```
-
-
-```{r, cache = TRUE}
-# Overflow analysis by station
-
-# Graph of Stations with Most Overflow 
-ggplot(head(map[order(map$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col() +xlab("Station") + ylab("Overflow") + ggtitle("Stations with Most Overflow")
-
-# Map of Stations with most overflow 
 #map_top_overflow <- head(map[order(map$overflow, decreasing = TRUE), ], 15)
-map_top_overflow <- map %>% arrange(desc(overflow)) %>% head(15)
+map_top_overflow <- map %>% arrange(desc(overflow)) %>% head(30)
 map_top_overflow
 
 leaflet(map_top_overflow) %>% 
   addCircles(lng = ~map_top_overflow$start.station.longitude, lat = ~map_top_overflow$start.station.latitude) %>%
   addTiles() %>%
   addMarkers(~map_top_overflow$start.station.longitude, ~map_top_overflow$start.station.latitude, popup = paste("Station Name:", map_top_overflow$start.station.name, "<br>", "Total Overflow", map_top_overflow$overflow)) %>%
-  setView(-73.96,40.75, zoom = 9)
+  setView(-73.96,40.75, zoom = 11)
 ```
 
-
+# Underflow Analysis by Station (Year 2019) 
+According to the below graph, E 39th St & 3rd Ave has the most underflow, followed by W 45th St & 6 Ave, Henry Street TBUUUUU. The map provides a visual of the stations with the most overflow.
 ```{r, cache = TRUE}
-# Understanding underflow based on stations 
-
 # Graph of Stations with Most Underflow
 ggplot(tail(map[order(map$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col() +xlab("Station") + ylab("Overflow") + ggtitle("Stations with Most Underflow")
 
@@ -166,7 +166,7 @@ leaflet(map_top_underflow) %>%
   ################## In explanation, based on looking at the map, look at if there are any places to add a new station.
 ```
 
-
+# 
 ```{r}
 # Is there more overflow or underflow? 
 map %>% group_by(overflow_range) %>% summarize(n = n()) %>% ggplot(aes(overflow_range, n)) + geom_col() + ggtitle("Number of Start Stations with Overflow and Underflow") +
@@ -249,66 +249,3 @@ ggplot(head(rush_hourSum[order(rush_hourSum$overflow, decreasing = TRUE),], 5), 
 # Stations with Most Underflow During Afternoon Rush Hour 
 ggplot(tail(rush_hourSum[order(rush_hourSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col() +xlab("Station") + ylab("Overflow") + ggtitle("Stations with Most Underflow During Rush Hour")
 ```
-
-```{r, cache = TRUE}
-
-# Night 
-dumdum5 <- Trafficdf %>% filter(hourStart < 23, hourStart >= 20, hourStop < 23, hourStop >= 20)
-aa5 <- dumdum5 %>% select(hourStart, start.station.name) %>%group_by(start.station.name, hourStart) %>% summarize(nn = n())
-bb5 <- dumdum5 %>% select(hourStop, end.station.name) %>% group_by(end.station.name, hourStop) %>% summarize(nnn = n())
-#print(bb); print(aa)
-
-a5 <- aa5 %>% mutate(id = paste(start.station.name, hourStart, sep = " @ ", collapse = NULL))
-b5 <- bb5 %>% mutate(id = paste(end.station.name, hourStop, sep = " @ ", collapse = NULL))
-
-
-night <- merge(a5, b5, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
-night$overflow <- night$nnn - night$nn 
-nightSum <- night %>% group_by(start.station.name) %>% summarize(overflow = sum(overflow))
-#nightSum %>% arrange(desc(overflow)) %>% head()
-sum(nightSum$overflow)
-
-#Stations with Most Overflow at Night  
-ggplot(head(nightSum[order(nightSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col() +xlab("Station") + ylab("Overflow") + ggtitle("Stations with Most Overflow at Night")
-
-# Stations with Most Underflow at Night 
-ggplot(tail(nightSum[order(nightSum$overflow, decreasing = TRUE),], 5), aes(x = start.station.name, y = overflow)) + geom_col() +xlab("Station") + ylab("Overflow") + ggtitle("Stations with Most Underflow at Night")
-```
-
-```{r, cache = TRUE}
-aa6 <- Trafficdf %>% select(day, start.station.name) %>%group_by(start.station.name, day) %>% summarize(nn = n())
-bb6 <- Trafficdf %>% select(day, end.station.name) %>% group_by(end.station.name, day) %>% summarize(nnn = n())
-#print(bb); print(aa)
-
-a6 <- aa6 %>% mutate(id = paste(start.station.name, day, sep = " @ ", collapse = NULL))
-b6 <- bb6 %>% mutate(id = paste(end.station.name, day, sep = " @ ", collapse = NULL))
-
-
-days <- merge(a6, b6, by.x = 'id', by.y = 'id', all.x = TRUE) %>% group_by(id) %>% mutate(nnn = ifelse(is.na(nnn), 0, nnn)) 
-days$overflow <- days$nnn - days$nn 
-head(days)
-
-#Stations with Most Overflow per day
-ggplot(head(days[order(days$overflow, decreasing = TRUE),], 5), aes(x = id, y = overflow)) + geom_col() +xlab("Station") + ylab("Overflow") + ggtitle("Stations with Most Overflow per Day")
-
-# Stations with Most Underflow per day
-ggplot(tail(days[order(days$overflow, decreasing = TRUE),], 5), aes(x = id, y = overflow)) + geom_col() +xlab("Station") + ylab("Overflow") + ggtitle("Stations with Most Underflow per Day")
-```
-
-```{r, cache = TRUE}
-#top 20 used stations which didn't have ANY overflow or underflow
-map %>% filter(overflow == 0) %>% arrange(desc(nn,nnn)) %>% head(20)
-#how many stations didn't have ANY overflow or underflow
-map %>% filter(overflow == 0) %>% arrange(desc(nn,nnn)) %>% nrow() 
-
-allHour <- rbind(morning, afternoon, rush_hour, night)
-#allHour %>% group_by(hourStart) %>% summarize(n = overflow) %>% arrange(desc(n))
-#head(allHour)
-m1<-lm(allHour$overflow ~ allHour$hourStart) #times of start and stop affect overflow 
-m2<-lm(days$overflow ~ days$day.x) # day does not affect overflow much
-summary(m1); summary(m2)
-
-ggplot(allHour, aes(hourStart, overflow, group = hourStart)) + geom_boxplot() + ylim(-70, 70) + geom_abline(slope = 0, intercept = 0) +xlab("Hour") + ylab("Overflow") + ggtitle("Overflow by Hour of Day")
-ggplot(days, aes(day.x, overflow, group = day.x)) + geom_boxplot() + ylim(-50, 50) + geom_abline(slope = 0, intercept = 0) +xlab("Day") + ylab("Overflow") + ggtitle("Overflow by Days of the Week")
-```
-
